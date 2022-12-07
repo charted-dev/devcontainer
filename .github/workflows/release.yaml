@@ -44,8 +44,8 @@ jobs:
     - name: Build and push
       uses: docker/build-push-action@v3
       with:
-        context: images/base
-        file: ./images/base/Dockerfile
+        context: .
+        file: ./Dockerfile
         platforms: linux/amd64
         push: true
         tags: registry.floofy.dev/noelware/charted/coder:latest
