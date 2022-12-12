@@ -42,9 +42,15 @@ data "coder_workspace" "me" {
 }
 
 resource "coder_agent" "main" {
-  arch = "amd64"
-  dir  = var.dir
-  os   = "linux"
+  arch            = "amd64"
+  dir             = var.dir
+  os              = "linux"
+  shutdown_script = <<-EOF
+  #!/bin/bash
+
+  # Shutdown Docker
+  sudo systemctl stop docker
+  EOF
 
   startup_script = <<-EOF
   #!/bin/bash
@@ -57,9 +63,8 @@ resource "coder_agent" "main" {
   sudo mkdir -p /etc/apt/keyrings
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 
-  sudo apt update && sudo apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-buildx-plugin
+  sudo apt update && sudo apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin
   sudo systemctl enable --now docker
-
   sudo usermod -aG docker $USER
 
   # Now, let's enable dotfiles
@@ -91,8 +96,7 @@ resource "kubernetes_pod" "charted-server" {
     name      = "charted-server"
 
     labels = {
-      "k8s.noelware.cloud/component" = "cloud",
-      "k8s.noelware.cloud/template"  = "charted-dev/coder-templates"
+      "k8s.noelware.cloud/component" = "cloud"
     }
   }
 

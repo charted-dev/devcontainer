@@ -51,6 +51,6 @@ variable "dir" {
 
 variable "docker_image" {
   description = "Docker image to use to provision the Kubernetes pod"
-  default     = "registry.floofy.dev/noelware/charted/coder:latest"
+  default     = "auguwu/coder-charted:2022.12.12"
   type        = string
 }
