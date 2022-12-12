@@ -51,4 +51,4 @@ jobs:
         file: ./Dockerfile
         platforms: linux/amd64
         push: true
-        tags: auguwu/charted-coder:${{steps.outputs.tag.version}}
+        tags: auguwu/charted-coder:${{steps.tag.outputs.version}}
