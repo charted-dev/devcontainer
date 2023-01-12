@@ -1,28 +1,29 @@
-# coder-templates: Templates to aid development with Noelware's Charts Platform with Coder (https://coder.com)
-# Copyright (c) 2022 Noelware <team@noelware.org>
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
-# We only need this since charted-server requires a Go installation, so... yeah!
 FROM ghcr.io/auguwu/coder-images/java
 
+ENV USERNAME=noel
+
+# go into root, we need to install some stuff (like Docker)
+USER root
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt update && apt upgrade -y && apt install -y postgresql-client redis-tools
+
+# go back to noel user
+USER ${USERNAME}
+
+# Add the Go toolchain here so we can develop the ClickHouse Migrations code
 COPY --from=ghcr.io/auguwu/coder-images/golang /opt/golang/tools/golangci /opt/golang/tools/golangci
 COPY --from=ghcr.io/auguwu/coder-images/golang /opt/golang/go             /opt/golang/go
 
-ENV PATH=$PATH:/opt/golang/go/bin:/opt/golang/tools/golangci
+# Add the Rust toochain so we can develop the Helm Plugin
+COPY --from=ghcr.io/auguwu/coder-images/rust --chown=${USERNAME}:${USERNAME} /home/${USERNAME}/.rustup /home/${USERNAME}/.rustup
+COPY --from=ghcr.io/auguwu/coder-images/rust --chown=${USERNAME}:${USERNAME} /home/${USERNAME}/.cargo  /home/${USERNAME}/.cargo
+
+# node
+COPY --from=ghcr.io/auguwu/coder-images/node /opt/nodejs /opt/nodejs
+
+# Go back to the user
+USER ${USERNAME}
+
+ENV LANG="en-US.UTF-8"
+ENV PATH=$PATH:/opt/golang/go/bin:/opt/golang/tools/golangci:/opt/nodejs/bin:/home/${USERNAME}/.cargo/bin
