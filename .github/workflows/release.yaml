@@ -31,4 +31,6 @@ jobs:
         file: ./Dockerfile
         platforms: linux/amd64
         push: true
-        tags: registry.floofy.dev/charted/devcontainer:${{steps.tag.outputs.version}}
+        tags: |
+          registry.floofy.dev/charted/devcontainer:${{steps.tag.outputs.version}},
+          registry.floofy.dev/charted/devcontainer:latest
